@@ -1,3 +1,9 @@
+
+./build/bin/llama-server -hf Qwen/Qwen3-32B-GGUF --host 0.0.0.0 --port 91000 --n-gpu-layers 100 --threads 4 --ctx-size 4096 --batch-size 256
+
+
+<!-- 
+
 docker run --rm --gpus all \
   -v /path/to/models:/models \
   -p 8000:8000 \
@@ -30,3 +36,4 @@ docker run --rm --gpus all \
 
 ./build/bin/llama-server -hf Qwen/Qwen3-8B-GGUF --host 0.0.0.0 --port 91000 --n-gpu-layers 100 --threads 4 --ctx-size 4096 --batch-size 256
 
+-->

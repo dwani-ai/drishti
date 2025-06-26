@@ -32,7 +32,7 @@ messages = [
 
 # 4. Call the chat completion endpoint with function calling
 response = client.chat.completions.create(
-    model="Qwen3-8B-GGUF",
+    model="Qwen3-32B-GGUF",
     messages=messages,
     functions=functions,
     function_call="auto"
