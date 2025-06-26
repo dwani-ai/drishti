@@ -1,10 +1,10 @@
-import whisper
 import pyaudio
 import wave
 import numpy as np
 import time
 import os
 from difflib import SequenceMatcher  # For fuzzy matching
+from transformers import pipeline  # Hugging Face transformers for Whisper
 
 # Audio recording parameters
 RATE = 16000  # Sample rate (Hz)
@@ -38,10 +38,10 @@ def record_audio(filename, duration=3, wake_word_mode=True):
     
     return filename
 
-def transcribe_audio(filename, model):
-    """Transcribe audio using Whisper."""
+def transcribe_audio(filename, pipe):
+    """Transcribe audio using Whisper via Hugging Face pipeline."""
     try:
-        result = model.transcribe(filename, fp16=False)
+        result = pipe(filename, return_timestamps=False)
         text = result["text"].strip().lower()
         print(f"Raw Transcription: '{text}'")
         return text
@@ -67,7 +67,7 @@ def is_wake_word_detected(text, wake_word=WAKE_WORD, threshold=0.8):
                 return True
     return False
 
-def listen_for_wake_word(model, wake_word=WAKE_WORD):
+def listen_for_wake_word(pipe, wake_word=WAKE_WORD):
     """Listen continuously for the wake word."""
     attempt = 1
     while True:
@@ -75,7 +75,7 @@ def listen_for_wake_word(model, wake_word=WAKE_WORD):
         filename = f"temp_wake_{attempt}.wav"
         record_audio(filename, duration=3, wake_word_mode=True)
         
-        text = transcribe_audio(filename, model)
+        text = transcribe_audio(filename, pipe)
         
         if os.path.exists(filename):
             os.remove(filename)
@@ -87,12 +87,12 @@ def listen_for_wake_word(model, wake_word=WAKE_WORD):
         attempt += 1
         time.sleep(0.1)  # Avoid CPU overload
 
-def listen_and_transcribe(model):
+def listen_and_transcribe(pipe):
     """Listen for a command after wake word detection."""
     filename = "temp_command.wav"
     record_audio(filename, duration=10, wake_word_mode=False)
     
-    text = transcribe_audio(filename, model)
+    text = transcribe_audio(filename, pipe)
     
     if os.path.exists(filename):
         os.remove(filename)
@@ -100,13 +100,18 @@ def listen_and_transcribe(model):
     return text
 
 def main():
-    print("Loading Whisper 'large-v3' model...")
-    model = whisper.load_model("large-v3")  # Updated to the largest model
+    print("Loading Whisper 'large-v3-turbo' model...")
+    # Load the Whisper large-v3-turbo model using Hugging Face pipeline
+    pipe = pipeline(
+        "automatic-speech-recognition",
+        model="openai/whisper-large-v3-turbo",
+        device="cuda:0" if torch.cuda.is_available() else "cpu"  # Use GPU if available
+    )
     print("Model loaded successfully.")
     
     while True:
-        if listen_for_wake_word(model, wake_word=WAKE_WORD):
-            command = listen_and_transcribe(model)
+        if listen_for_wake_word(pipe, wake_word=WAKE_WORD):
+            command = listen_and_transcribe(pipe)
             if command:
                 print(f"Transcribed Command: '{command}'")
                 if "what do you see" in command.lower():
@@ -121,6 +126,7 @@ def main():
 
 if __name__ == "__main__":
     try:
+        import torch  # Required for device handling
         main()
     except KeyboardInterrupt:
         print("\nStopped by user.")

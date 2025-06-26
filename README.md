@@ -40,3 +40,5 @@ sudo apt-get install python3-dev
 
   - pip install openai-whisper pyaudio numpy
   - python src/voice_dwani.py
+
+  - pip install transformers
