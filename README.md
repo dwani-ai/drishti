@@ -28,6 +28,15 @@ huggingface-cli download google/gemma-3-27b-it-qat-q4_0-gguf --local-dir hf_mode
  ./build/bin/llama-server   --model hf_models/gemma-3-27b-it-q4_0.gguf  --mmproj hf_models/mmproj-model-f16-27B.gguf  --host 0.0.0.0   --port 9000   --n-gpu-layers 100   --threads 4   --ctx-size 4096   --batch-size 256
  
 
+sudo apt-get update
+sudo apt-get install portaudio19-dev
+sudo apt-get install build-essential
+sudo apt-get install python3-dev
+
 - Client
   - pip install openai pytz requests opencv-python
   - python src/frame_desctibe.py
+
+
+  - pip install openai-whisper pyaudio numpy
+  - python src/voice_dwani.py
