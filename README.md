@@ -15,3 +15,8 @@ dristhi  - Assitant for Visually Challenged
   - Rpi + Pi Camera + Mic
   - Reachy Mini
   - Alexa/Echo / Google Home
+
+
+
+  - pip install openai pytz
+  - python src/qwen_tool_api.py
