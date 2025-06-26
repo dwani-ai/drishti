@@ -1,10 +1,16 @@
 
-./build/bin/llama-server -hf Qwen/Qwen3-32B-GGUF --host 0.0.0.0 --port 91000 --n-gpu-layers 100 --threads 4 --ctx-size 4096 --batch-size 256 --jinja -fa --reasoning-format deepseek
+./build/bin/llama-server -hf Qwen/Qwen3-32B-GGUF --host 0.0.0.0 --port 91000 --n-gpu-layers 100 --threads 4 --ctx-size 4096 --batch-size 256 --jinja -fa 
 
 
-./llama-server -hf Qwen/Qwen3-32B-GGUF:Q4_K_M --jinja -fa --reasoning-format deepseek -ngl 99 -c 32768 --port 8080
+huggingface-cli download google/gemma-3-27b-it-qat-q4_0-gguf --local-dir hf_models/
+
+ ./build/bin/llama-server   --model hf_models/gemma-3-27b-it-q4_0.gguf  --mmproj hf_models/mmproj-model-f16-27B.gguf  --host 0.0.0.0   --port 9000   --n-gpu-layers 100   --threads 4   --ctx-size 4096   --batch-size 256
+ 
+
 
 <!-- 
+./build/bin/llama-server -hf Qwen/Qwen3-32B-GGUF --host 0.0.0.0 --port 91000 --n-gpu-layers 100 --threads 4 --ctx-size 4096 --batch-size 256 --jinja -fa --reasoning-format deepseek
+
 
 docker run --rm --gpus all \
   -v /path/to/models:/models \
