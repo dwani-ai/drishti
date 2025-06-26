@@ -1,7 +1,7 @@
 from openai import OpenAI
 import json
-import requests
 from datetime import datetime
+import pytz
 
 # Initialize the OpenAI client for llama.cpp's server
 client = OpenAI(base_url="http://localhost:9100/v1", api_key="EMPTY")
@@ -27,22 +27,20 @@ tools = [
     }
 ]
 
-# Function to get the current time for a given timezone using worldtimeapi.org
+# Function to get the current time for a given timezone using pytz
 def get_current_time(timezone):
     try:
-        # Query the worldtimeapi.org for the current time
-        response = requests.get(f"http://worldtimeapi.org/api/timezone/{timezone}")
-        response.raise_for_status()  # Raise an error for bad responses
-        data = response.json()
+        # Validate and get timezone
+        tz = pytz.timezone(timezone)
         
-        # Parse the datetime and format it
-        current_time = datetime.fromisoformat(data["datetime"].replace("Z", "+00:00"))
+        # Get current time in the specified timezone
+        current_time = datetime.now(tz)
         formatted_time = current_time.strftime("%I:%M:%S %p %Z, %A, %B %d, %Y")
         return {"timezone": timezone, "current_time": formatted_time}
-    except requests.RequestException as e:
+    except pytz.exceptions.UnknownTimeZoneError:
+        return {"error": f"Invalid timezone: {timezone}"}
+    except Exception as e:
         return {"error": f"Failed to fetch time for {timezone}: {str(e)}"}
-    except KeyError:
-        return {"error": f"Invalid response from time API for {timezone}"}
 
 # Main function to handle the chat interaction
 def chat_with_qwen3():
