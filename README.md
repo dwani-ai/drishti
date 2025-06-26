@@ -18,5 +18,5 @@ dristhi  - Assitant for Visually Challenged
 
 
 
-  - pip install openai pytz requests
+  - pip install openai pytz requests opencv-python
   - python src/qwen_tool_api.py

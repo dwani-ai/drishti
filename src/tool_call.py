@@ -6,8 +6,17 @@ import cv2
 import os
 import tempfile
 
+
+
+import os
+
+# Set API key and base URL
+server_url = os.getenv("API_SERVER")
+
 # Initialize the OpenAI client for llama.cpp's server
-client = OpenAI(base_url="http://localhost:9100/v1", api_key="EMPTY")
+#client = OpenAI(base_url="http://localhost:9100/v1", api_key="EMPTY")
+
+client = OpenAI(base_url=server_url, api_key="EMPTY")
 
 # Define the tools (functions) for getting the current time and capturing webcam image
 tools = [
