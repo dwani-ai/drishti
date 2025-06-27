@@ -165,7 +165,7 @@ def chat_with_qwen3():
 
     try:
         response = tool_client.chat.completions.create(
-            model="Qwen3-32B",
+            model="Qwen3-8B",
             messages=messages,
             tools=tools,
             tool_choice="auto",
@@ -187,7 +187,7 @@ def chat_with_qwen3():
                         "tool_call_id": tool_call.id
                     })
                     final_response = tool_client.chat.completions.create(
-                        model="Qwen3-32B",
+                        model="Qwen3-8B",
                         messages=messages,
                         temperature=0.0,
                         max_tokens=32768
@@ -202,7 +202,7 @@ def chat_with_qwen3():
                             "tool_call_id": tool_call.id
                         })
                         final_response = tool_client.chat.completions.create(
-                            model="Qwen3-32B",
+                            model="Qwen3-8B",
                             messages=messages,
                             temperature=0.0,
                             max_tokens=32768
