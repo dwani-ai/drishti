@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  llama-server:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    command: >
+      ./build/bin/llama-server
+      -hf Qwen/Qwen3-32B-GGUF
+      --host 0.0.0.0
+      --port 9100
+      --n-gpu-layers 100
+      --threads 4
+      --ctx-size 4096
+      --batch-size 256
+      --jinja
+      -fa
+    ports:
+      - "9100:9100"
+    volumes:
+      - ./models:/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - LLAMA_ARG_MODEL=/models/Qwen/Qwen3-32B-GGUF # If your image expects this env
+    tty: true
