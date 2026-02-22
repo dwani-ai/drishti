@@ -157,63 +157,59 @@ def capture_webcam_image():
     except Exception as e:
         return {"error": f"Error capturing webcam image: {str(e)}"}
 
-# Main function to handle the chat interaction
+import json
+
 def chat_with_qwen3():
-    messages = [
-        {"role": "user", "content": "What do you see?"}
+    user_prompts = [
+        "What do you see?",
+        "What is the time in Bengaluru ?",
+        "What is the time in Bonn?"
     ]
+    messages = []
 
     try:
-        response = tool_client.chat.completions.create(
-            model="Qwen3-32B",
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-            temperature=0.0,  # Ensure direct, deterministic responses
-            max_tokens=32768
-        )
+        for prompt in user_prompts:
+            # Add user message
+            messages.append({"role": "user", "content": prompt})
 
-        response_message = response.choices[0].message
+            while True:
+                response = tool_client.chat.completions.create(
+                    model="Qwen3-32B",
+                    messages=messages,
+                    tools=tools,
+                    tool_choice="auto",
+                    temperature=0.0,
+                    max_tokens=32768
+                )
+                response_message = response.choices[0].message
 
-        if response_message.tool_calls:
-            for tool_call in response_message.tool_calls:
-                if tool_call.function.name == "get_current_time":
-                    args = json.loads(tool_call.function.arguments)
-                    timezone = args.get("timezone", "Europe/Berlin")
-                    time_data = get_current_time(timezone)
-                    messages.append({
-                        "role": "tool",
-                        "content": json.dumps(time_data),
-                        "tool_call_id": tool_call.id
-                    })
-                    final_response = tool_client.chat.completions.create(
-                        model="Qwen3-32B",
-                        messages=messages,
-                        temperature=0.0,
-                        max_tokens=32768
-                    )
-                    print(final_response.choices[0].message.content)
-                elif tool_call.function.name == "capture_webcam_image":
-                    image_data = capture_webcam_image()
-                    if "error" not in image_data:
-                        messages.append({
-                            "role": "tool",
-                            "content": json.dumps(image_data),
-                            "tool_call_id": tool_call.id
-                        })
-                        final_response = tool_client.chat.completions.create(
-                            model="Qwen3-32B",
-                            messages=messages,
-                            temperature=0.0,
-                            max_tokens=32768
-                        )
-                        print(final_response.choices[0].message.content)
-                    else:
-                        print(image_data["error"])
+                # If there are tool calls, handle them
+                if hasattr(response_message, "tool_calls") and response_message.tool_calls:
+                    for tool_call in response_message.tool_calls:
+                        if tool_call.function.name == "get_current_time":
+                            args = json.loads(tool_call.function.arguments)
+                            timezone = args.get("timezone", "Europe/Berlin")
+                            time_data = get_current_time(timezone)
+                            messages.append({
+                                "role": "tool",
+                                "content": json.dumps(time_data),
+                                "tool_call_id": tool_call.id
+                            })
+                        elif tool_call.function.name == "capture_webcam_image":
+                            image_data = capture_webcam_image()
+                            messages.append({
+                                "role": "tool",
+                                "content": json.dumps(image_data),
+                                "tool_call_id": tool_call.id
+                            })
+                        else:
+                            print(f"Unknown tool called: {tool_call.function.name}")
+                    # Continue the loop to let the model use the tool outputs
                 else:
-                    print(f"Unknown tool called: {tool_call.function.name}")
-        else:
-            print(response_message.content)
+                    # No tool calls, print and add the response
+                    print(f"Qwen3: {response_message.content}\n")
+                    messages.append({"role": "assistant", "content": response_message.content})
+                    break
 
     except Exception as e:
         print(f"Error occurred: {str(e)}")
